@@ -1,0 +1,92 @@
+#include <vector>
+#include <cmath>
+#include <complex>
+#include <string>
+
+using namespace std;
+
+class Material { 
+    public:
+    Material() : epsilon(1.0), mu(1.0) { n = sqrt(epsilon*mu); }; // vacuum constructor
+    Material(complex<double> epsilon) : epsilon(epsilon), mu(1.0) { n = sqrt(epsilon*mu);};
+    Material(complex<double> epsilon, complex<double> mu, string name="") 
+    : epsilon(epsilon), mu(mu), name(name) { n = sqrt(epsilon*mu); };
+
+    complex<double> getEpsilon() { return epsilon; };
+    complex<double> getMu() { return mu; };
+    complex<double> getN() {return sqrt(epsilon*mu); };
+
+   
+
+    private:
+    complex<double> epsilon; 
+    complex<double> mu;
+    complex<double> n;
+    string name = ""; 
+};
+
+class Layer { 
+public:
+    Layer(double thickness,Material const &  material, string name="") : thickness(thickness), material(material), name(name) {};
+    double getThickness() { return thickness; }; 
+    Material getMaterial() { return material; };
+    complex<double> getKz() { return kz; };
+    string getName() { return name; }; 
+    void setKz(complex<double> kz) {kz = kz; }; 
+
+  
+   
+private:
+    complex<double> kz; 
+    double thickness; 
+    Material material; 
+    string name;
+
+    
+
+};
+
+class TransferMatrix {
+public:
+    TransferMatrix(double frequency, double angle, vector<Layer> & structure_ ) : 
+    frequency(frequency), angle(angle), structure(structure_) { runSetup = false; };; 
+    TransferMatrix(double frequency, double angle) : frequency(frequency), angle(angle) { runSetup = false; };
+
+    void calculate(); // calculate transfer matrix for the given structure
+
+    // get S-parameters
+    complex<double> getRs() { return rs;};
+    complex<double> getRp() { return rp; };
+    complex<double> getTs() { return ts; };
+    complex<double> getTp() { return tp; };
+
+
+    vector<complex<double>> getSparams() {return {rs,ts,rp,tp}; }; // get all the above
+
+        // Composite matrices
+    vector<vector<complex<double>>> Ms; // s polarization 2x2 matrix
+    vector<vector<complex<double>>> Mp; // p polarization
+
+    
+
+private:
+    double frequency; 
+    double angle;
+    bool runSetup;
+    vector<Layer> structure;
+
+    // Elementary interface matrices
+    vector<vector<complex<double>>> interfaceMatrix_s(Layer const &  l1, Layer const &  l2);
+    vector<vector<complex<double>>> interfaceMatrix_p(Layer const &  l1, Layer const &  l2);
+    vector<vector<complex<double>>> propagate(Layer  &  layer, double distance); // propagation matrix
+
+
+
+    // S parameters
+    complex<double> rs = 0 ; 
+    complex<double> rp = 0;
+    complex<double> ts = 0;
+    complex<double> tp = 0;   
+
+
+};
