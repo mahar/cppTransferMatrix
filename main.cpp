@@ -26,7 +26,11 @@ int main() {
         cout << endl;
     }
 
+    cout << " rs = " << system->getTs() << endl;
+
     delete system;
+
+  
 
    
 

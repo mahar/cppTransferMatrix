@@ -53,10 +53,10 @@ void TransferMatrix::calculate() {
   //  }
 
     // step 3: populate S params 
-    //rs = Ms[1][0]/Ms[0][0];
-    //rp = Mp[1][0]/Mp[0][0];
-    //ts = 1.0/Ms[0][0];
-    //tp = 1.0/Mp[0][0];
+    rs = Ms[1][0]/Ms[0][0];
+    rp = Mp[1][0]/Mp[0][0];
+    ts = 1.0/Ms[0][0];
+    tp = 1.0/Mp[0][0];
     runSetup = true;
 
 }
