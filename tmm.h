@@ -33,7 +33,7 @@ public:
     Material getMaterial() { return material; };
     complex<double> getKz() { return kz; };
     string getName() { return name; }; 
-    void setKz(complex<double> kz) {kz = kz; }; 
+    void setKz(complex<double> kz_) { kz = kz_; }; 
 
   
    

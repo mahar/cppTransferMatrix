@@ -2,6 +2,7 @@
 #include <cmath>
 #include <complex>
 #include <string>
+#include <iostream>
 
 
 #include "tmm.h"
@@ -12,8 +13,16 @@ double const c_const = 299792458.0; // m/s
 double const eps0 = 8.85418782e-12; 
 double const mu0 = 1.25663706e-6;
 
+template <typename matr>
+void printMatrix(matr & m) {
+    for (auto v : m) { 
+        for (auto el : v) { 
+            std::cout << el << " - ";
+        }
+        std::cout << endl;
+    }
+}
 
-// matrix multiplication @to-do
 template <typename Matrix>
 Matrix matmul(Matrix & m1, Matrix & m2) {
     /**
@@ -51,14 +60,14 @@ void tmm::TransferMatrix::calculate() {
         Ms = {{1.0,0.0}, {0.0,1.0}};
         Mp = {{1.0,0.0}, {0.0,1.0}};
     } else {
-        return;
+        throw "Frequency mush be positive and structure array must not be empty.";
     }
 
     kx = k0*sin(angle);
 
    
     
-    for (Layer  l : structure ) { 
+    for (Layer &  l : structure ) { 
         complex<double> kz = sqrt(l.getMaterial().getN()*k0*k0 - kx*kx);
 
         l.setKz(kz);
@@ -68,17 +77,24 @@ void tmm::TransferMatrix::calculate() {
     // Step 2: calculate transfer matrix
     Ms = interfaceMatrix_s(structure[0], structure[1]);
     Mp = interfaceMatrix_p(structure[0], structure[1]);
+    std::cout << "calculating interface matrices 1-2. " << endl;
+
+    printMatrix(Ms);
 
     for (int i=1; i < structure.size()-1; ++i) {
 
         auto propagMatrix = propagate(structure[i], structure[i].getThickness());
         auto matrixS = interfaceMatrix_s(structure[i], structure[i+1]);
         auto matrixP = interfaceMatrix_p(structure[i], structure[i+1]);
+        std::cout << "PropagMAtrix = " << endl;
+        printMatrix(propagMatrix);
         Ms = matmul(Ms,propagMatrix);
         Mp = matmul(Mp,propagMatrix);
 
         Ms = matmul(Ms, matrixS);
         Mp = matmul(Mp, matrixP);
+        std::cout << "Ms = " << endl;
+        printMatrix(Ms);
 
      
 
@@ -106,12 +122,12 @@ vector<vector<complex<double>>> tmm::TransferMatrix::interfaceMatrix_s(Layer  & 
     complex<double> k2 = sqrt(eps1*mu1)*k0;
     complex<double> k2z = sqrt(norm(k2) - kx*kx); // norm(z) = ||z||^2
 
-    complex<double> eta = k2z*mu1/(k1z*mu2);
+    complex<double> normImpedance = k2z*mu1/(k1z*mu2); // normalized impedance
 
-    complex<double> M11 = 0.5 + 0.5*eta; 
-    complex<double> M12 = 0.5 - 0.5*eta; 
-    complex<double> M21 = 0.5 - 0.5*eta;
-    complex<double> M22 = 0.5 + 0.5*eta;
+    complex<double> M11 = 0.5 + 0.5*normImpedance; 
+    complex<double> M12 = 0.5 - 0.5*normImpedance; 
+    complex<double> M21 = 0.5 - 0.5*normImpedance;
+    complex<double> M22 = 0.5 + 0.5*normImpedance;
 
     vector<vector<complex<double>>> Ms; 
     Ms.push_back({M11,M12});
@@ -133,12 +149,12 @@ vector<vector<complex<double>>> tmm::TransferMatrix::interfaceMatrix_p(Layer  & 
     complex<double> k2 = sqrt(eps1*mu1)*k0;
     complex<double> k2z = sqrt(norm(k2) - kx*kx); // norm(z) = ||z||^2
 
-    complex<double> eta = k2z*eps1/(k1z*eps2);
+    complex<double> normImpedance = k2z*eps1/(k1z*eps2);
 
-    complex<double> M11 = 0.5 + 0.5*eta; 
-    complex<double> M12 = 0.5 - 0.5*eta; 
-    complex<double> M21 = 0.5 - 0.5*eta;
-    complex<double> M22 = 0.5 + 0.5*eta;
+    complex<double> M11 = 0.5 + 0.5*normImpedance; 
+    complex<double> M12 = 0.5 - 0.5*normImpedance; 
+    complex<double> M21 = 0.5 - 0.5*normImpedance;
+    complex<double> M22 = 0.5 + 0.5*normImpedance;
 
     vector<vector<complex<double>>> Mp; 
     Mp.push_back({M11,M12});
@@ -148,7 +164,16 @@ vector<vector<complex<double>>> tmm::TransferMatrix::interfaceMatrix_p(Layer  & 
 }
 
 vector<vector<complex<double>>> tmm::TransferMatrix::propagate(Layer  & layer, double distance) {
-    complex<double> kz = layer.getKz();
+    //complex<double> kz = layer.getKz();
+
+    complex<double> eps1 = layer.getMaterial().getEpsilon();
+    complex<double> mu1 = layer.getMaterial().getMu();
+    complex<double> k1 = sqrt(eps1*mu1)*k0;
+
+    complex<double> kz = sqrt(norm(k1) - kx*kx); // norm(z) = ||z||^2
+    layer.setKz(kz);
+
+    cout << "k0 = " << k0 << endl;
     complex<double> imagI = complex<double>{0.0,1.0};
     vector<vector<complex<double>>> P = {{exp(-imagI*kz*distance),0},{0,exp(+imagI*kz*distance)}};
     return P;
