@@ -3,6 +3,7 @@
 #include "tmm.h" 
 
 using namespace std;
+using namespace tmm;
 
 int main() {
     Material  air =  Material();

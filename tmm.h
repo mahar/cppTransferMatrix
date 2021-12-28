@@ -5,6 +5,7 @@
 
 using namespace std;
 
+namespace tmm {
 class Material { 
     public:
     Material() : epsilon(1.0), mu(1.0) { n = sqrt(epsilon*mu); }; // vacuum constructor
@@ -72,12 +73,14 @@ public:
 private:
     double frequency; 
     double angle;
+    double k0;
+    complex<double> kx;
     bool runSetup;
     vector<Layer> structure;
 
     // Elementary interface matrices
-    vector<vector<complex<double>>> interfaceMatrix_s(Layer const &  l1, Layer const &  l2);
-    vector<vector<complex<double>>> interfaceMatrix_p(Layer const &  l1, Layer const &  l2);
+    vector<vector<complex<double>>> interfaceMatrix_s(Layer  &  layer1, Layer  &  layer2);
+    vector<vector<complex<double>>> interfaceMatrix_p(Layer  &  layer1, Layer  &  layer2);
     vector<vector<complex<double>>> propagate(Layer  &  layer, double distance); // propagation matrix
 
 
@@ -90,3 +93,5 @@ private:
 
 
 };
+
+}
