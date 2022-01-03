@@ -28,34 +28,30 @@ void printMatrix(matrix & m) {
     }
 }
 
-
 /**
- * @brief Matrix multiplication function
+ * @brief Matrix multiplication function for 2x2 matrices
  * 
+ * @tparam matrix 
  * @param m1 
  * @param m2 
- * @return vector<vector<double>> 
+ * @return matrix 
  */
-vector<vector<double>> matmul(vector<vector<double>> & m1,  
-                            vector<vector<double>> & m2) {
+template <typename matrix>
+matrix matmul( matrix & m1,  matrix & m2) {
     /**
      * Matrix multiplication utility function
      * 
      */
-    int M = m1.size();
-    int N = m2[0].size();
+    int N = m1.size(); // m1 rows
+    int M = m1[0].size(); // m1 cols
+    int P = m2[0].size(); // m2 cols
 
     matrix  newMatrix = {{0.0,0}, {0,0.0}};
 
-    for (int i=0; i < N; ++i) {
-        for (int j=0; j < M; ++j) {
-            
-            for (int k=0; k < M; ++k) {
-                newMatrix[i][j] += m1[i][k]*m2[k][j];
-            }
-            
-        }
-    }
+    newMatrix[0][0] = m1[0][0]*m2[0][0] + m1[0][1]*m2[1][0];
+    newMatrix[1][1] = m1[1][0]*m2[0][1] + m1[1][1]*m2[1][1];
+    newMatrix[0][1] = m1[0][0]*m2[0][1] + m1[0][1]*m2[1][1];
+    newMatrix[1][0] = m1[1][0]*m2[0][0] + m1[1][1]*m2[1][0];
     return newMatrix;
 } 
 
@@ -89,17 +85,17 @@ void tmm::TransferMatrix::calculate() {
     // Step 2: calculate transfer matrix
     Ms = interfaceMatrix_s(structure[0], structure[1]);
     Mp = interfaceMatrix_p(structure[0], structure[1]);
-    //std::cout << "calculating interface matrices 1-2. " << endl;
-
-    //printMatrix(Ms);
+    
+    std::cout << "calculating interface matrices 1-2. " << endl;
+    printMatrix(Mp);
 
     for (int i=1; i < structure.size()-1; ++i) {
 
         auto propagMatrix = propagate(structure[i], structure[i].getThickness());
         auto matrixS = interfaceMatrix_s(structure[i], structure[i+1]);
         auto matrixP = interfaceMatrix_p(structure[i], structure[i+1]);
-        //std::cout << "PropagMAtrix = " << endl;
-        //printMatrix(propagMatrix);
+        std::cout << "PropagMAtrix = " << endl;
+        printMatrix(propagMatrix);
         Ms = matmul(Ms,propagMatrix);
         Mp = matmul(Mp,propagMatrix);
 
@@ -111,6 +107,7 @@ void tmm::TransferMatrix::calculate() {
      
 
     }
+
 
     // step 3: populate S params 
     rs = Ms[1][0]/Ms[0][0];
@@ -138,7 +135,7 @@ vector<vector<complex<double>>> tmm::TransferMatrix::interfaceMatrix_s(Layer  & 
 
     complex<double> eps2 = layer2.getMaterial().getEpsilon();
     complex<double> mu2 = layer2.getMaterial().getMu();
-    complex<double> k2 = sqrt(eps1*mu1)*k0;
+    complex<double> k2 = sqrt(eps2*mu2)*k0;
     complex<double> k2z = sqrt(norm(k2) - kx*kx); // norm(z) = ||z||^2
 
     complex<double> normImpedance = k2z*mu1/(k1z*mu2); // normalized impedance
@@ -172,8 +169,10 @@ vector<vector<complex<double>>> tmm::TransferMatrix::interfaceMatrix_p(Layer  & 
 
     complex<double> eps2 = layer2.getMaterial().getEpsilon();
     complex<double> mu2 = layer2.getMaterial().getMu();
-    complex<double> k2 = sqrt(eps1*mu1)*k0;
+    complex<double> k2 = sqrt(eps2*mu2)*k0;
     complex<double> k2z = sqrt(norm(k2) - kx*kx); // norm(z) = ||z||^2
+
+    cout << endl << "k2z = " << k2z << endl;
 
     complex<double> normImpedance = k2z*eps1/(k1z*eps2);
 

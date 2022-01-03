@@ -9,6 +9,7 @@
 using namespace std;
 
 namespace tmm {
+    
 class Material { 
 public:
     Material() : epsilon(1.0), mu(1.0) { n = sqrt(epsilon*mu); }; // vacuum constructor
@@ -48,10 +49,10 @@ private:
 class TransferMatrix {
 public:
     TransferMatrix(double frequency, double angle, vector<Layer> & structure_ ) : 
-    frequency(frequency), angle(angle), structure(structure_) { runSetup = false; calculate(); };; 
-    TransferMatrix(double frequency, double angle) : frequency(frequency), angle(angle) { runSetup = false; calculate(); };
+    frequency(frequency), angle(angle), structure(structure_) { runSetup = false;  };; 
+    TransferMatrix(double frequency, double angle) : frequency(frequency), angle(angle) { runSetup = false;  };
 
-    void calculate() {cout << "calc" << endl;}; // calculate transfer matrix for the given structure
+    void calculate(); // calculate transfer matrix for the given structure
 
     // get S-parameters
     complex<double> getRs() { return rs;};
@@ -63,6 +64,12 @@ public:
     // Composite matrices
     vector<vector<complex<double>>> Ms; // s polarization 2x2 matrix
     vector<vector<complex<double>>> Mp; // p polarization 2x2 matrix
+
+    // Elementary interface matrices
+    vector<vector<complex<double>>> interfaceMatrix_s(Layer  &  layer1, Layer  &  layer2);
+    vector<vector<complex<double>>> interfaceMatrix_p(Layer  &  layer1, Layer  &  layer2);
+    vector<vector<complex<double>>> propagate(Layer  &  layer, double distance); // propagation matrix
+
 private:
     double frequency; 
     double angle;
@@ -70,12 +77,6 @@ private:
     complex<double> kx;
     bool runSetup;
     vector<Layer> structure;
-
-    // Elementary interface matrices
-    vector<vector<complex<double>>> interfaceMatrix_s(Layer  &  layer1, Layer  &  layer2);
-    vector<vector<complex<double>>> interfaceMatrix_p(Layer  &  layer1, Layer  &  layer2);
-    vector<vector<complex<double>>> propagate(Layer  &  layer, double distance); // propagation matrix
-
     // S parameters
     complex<double> rs = 0 ; 
     complex<double> rp = 0;
@@ -88,3 +89,4 @@ private:
 }
 
 #endif // define TMM_H
+
