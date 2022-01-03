@@ -1,3 +1,6 @@
+#ifndef TMM_H
+#define TMM_H 
+
 #include <vector>
 #include <cmath>
 #include <complex>
@@ -7,7 +10,7 @@ using namespace std;
 
 namespace tmm {
 class Material { 
-    public:
+public:
     Material() : epsilon(1.0), mu(1.0) { n = sqrt(epsilon*mu); }; // vacuum constructor
     Material(complex<double> epsilon) : epsilon(epsilon), mu(1.0) { n = sqrt(epsilon*mu);};
     Material(complex<double> epsilon, complex<double> mu, string name="") 
@@ -17,9 +20,7 @@ class Material {
     complex<double> getMu() { return mu; };
     complex<double> getN() {return sqrt(epsilon*mu); };
 
-   
-
-    private:
+private:
     complex<double> epsilon; 
     complex<double> mu;
     complex<double> n;
@@ -35,41 +36,33 @@ public:
     string getName() { return name; }; 
     void setKz(complex<double> kz_) { kz = kz_; }; 
 
-  
-   
 private:
     complex<double> kz; 
     double thickness; 
     Material material; 
     string name;
 
-    
 
 };
 
 class TransferMatrix {
 public:
     TransferMatrix(double frequency, double angle, vector<Layer> & structure_ ) : 
-    frequency(frequency), angle(angle), structure(structure_) { runSetup = false; };; 
-    TransferMatrix(double frequency, double angle) : frequency(frequency), angle(angle) { runSetup = false; };
+    frequency(frequency), angle(angle), structure(structure_) { runSetup = false; calculate(); };; 
+    TransferMatrix(double frequency, double angle) : frequency(frequency), angle(angle) { runSetup = false; calculate(); };
 
-    void calculate(); // calculate transfer matrix for the given structure
+    void calculate() {cout << "calc" << endl;}; // calculate transfer matrix for the given structure
 
     // get S-parameters
     complex<double> getRs() { return rs;};
     complex<double> getRp() { return rp; };
     complex<double> getTs() { return ts; };
     complex<double> getTp() { return tp; };
-
-
     vector<complex<double>> getSparams() {return {rs,ts,rp,tp}; }; // get all the above
 
-        // Composite matrices
+    // Composite matrices
     vector<vector<complex<double>>> Ms; // s polarization 2x2 matrix
-    vector<vector<complex<double>>> Mp; // p polarization
-
-    
-
+    vector<vector<complex<double>>> Mp; // p polarization 2x2 matrix
 private:
     double frequency; 
     double angle;
@@ -83,8 +76,6 @@ private:
     vector<vector<complex<double>>> interfaceMatrix_p(Layer  &  layer1, Layer  &  layer2);
     vector<vector<complex<double>>> propagate(Layer  &  layer, double distance); // propagation matrix
 
-
-
     // S parameters
     complex<double> rs = 0 ; 
     complex<double> rp = 0;
@@ -95,3 +86,5 @@ private:
 };
 
 }
+
+#endif // define TMM_H

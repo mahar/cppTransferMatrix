@@ -3,18 +3,23 @@
 #include <complex>
 #include <string>
 #include <iostream>
-
-
 #include "tmm.h"
 
 using namespace std;
+
 // frequency should be in rad/sec// frequency should be in rad/sec
 double const c_const = 299792458.0; // m/s
 double const eps0 = 8.85418782e-12; 
 double const mu0 = 1.25663706e-6;
 
-template <typename matr>
-void printMatrix(matr & m) {
+/**
+ * @brief Print 2D matrix.
+ * 
+ * @tparam matrix 
+ * @param m 
+ */
+template <typename matrix>
+void printMatrix(matrix & m) {
     for (auto v : m) { 
         for (auto el : v) { 
             std::cout << el << " - ";
@@ -23,32 +28,41 @@ void printMatrix(matr & m) {
     }
 }
 
-template <typename Matrix>
-Matrix matmul(Matrix & m1, Matrix & m2) {
+
+/**
+ * @brief Matrix multiplication function
+ * 
+ * @param m1 
+ * @param m2 
+ * @return vector<vector<double>> 
+ */
+vector<vector<double>> matmul(vector<vector<double>> & m1,  
+                            vector<vector<double>> & m2) {
     /**
      * Matrix multiplication utility function
      * 
      */
-    int n = m1.size();
-    int m = m1[0].size();
-    int p = m2[1].size();
+    int M = m1.size();
+    int N = m2[0].size();
 
-    Matrix newMatrix(n, vector<complex<double>>(p));
+    matrix  newMatrix = {{0.0,0}, {0,0.0}};
 
-    for (int i=0; i < n; ++i) {
-        for (int j=0; j < m; ++j) {
-            complex<double> sum(0.0,0.0);
-            for (int k=0; k < m; ++k) {
-                sum += m1[i][k]*m2[k][j];
+    for (int i=0; i < N; ++i) {
+        for (int j=0; j < M; ++j) {
+            
+            for (int k=0; k < M; ++k) {
+                newMatrix[i][j] += m1[i][k]*m2[k][j];
             }
-            newMatrix[i][j] = sum;
+            
         }
     }
     return newMatrix;
 } 
 
-
-
+/**
+ * @brief Calculation function.
+ * 
+ */
 void tmm::TransferMatrix::calculate() {
 
     // Step 1: for a given frequency and angle of incidence 
@@ -60,12 +74,10 @@ void tmm::TransferMatrix::calculate() {
         Ms = {{1.0,0.0}, {0.0,1.0}};
         Mp = {{1.0,0.0}, {0.0,1.0}};
     } else {
-        throw "Frequency mush be positive and structure array must not be empty.";
+        throw "Frequency must be positive and structure array must not be empty.";
     }
 
     kx = k0*sin(angle);
-
-   
     
     for (Layer &  l : structure ) { 
         complex<double> kz = sqrt(l.getMaterial().getN()*k0*k0 - kx*kx);
@@ -77,24 +89,24 @@ void tmm::TransferMatrix::calculate() {
     // Step 2: calculate transfer matrix
     Ms = interfaceMatrix_s(structure[0], structure[1]);
     Mp = interfaceMatrix_p(structure[0], structure[1]);
-    std::cout << "calculating interface matrices 1-2. " << endl;
+    //std::cout << "calculating interface matrices 1-2. " << endl;
 
-    printMatrix(Ms);
+    //printMatrix(Ms);
 
     for (int i=1; i < structure.size()-1; ++i) {
 
         auto propagMatrix = propagate(structure[i], structure[i].getThickness());
         auto matrixS = interfaceMatrix_s(structure[i], structure[i+1]);
         auto matrixP = interfaceMatrix_p(structure[i], structure[i+1]);
-        std::cout << "PropagMAtrix = " << endl;
-        printMatrix(propagMatrix);
+        //std::cout << "PropagMAtrix = " << endl;
+        //printMatrix(propagMatrix);
         Ms = matmul(Ms,propagMatrix);
         Mp = matmul(Mp,propagMatrix);
 
         Ms = matmul(Ms, matrixS);
         Mp = matmul(Mp, matrixP);
-        std::cout << "Ms = " << endl;
-        printMatrix(Ms);
+        //std::cout << "Ms = " << endl;
+        //printMatrix(Ms);
 
      
 
@@ -109,6 +121,13 @@ void tmm::TransferMatrix::calculate() {
 
 }
 
+/**
+ * @brief Interface Matrix for s polarization
+ * 
+ * @param layer1 
+ * @param layer2 
+ * @return vector<vector<complex<double>>> 
+ */
 vector<vector<complex<double>>> tmm::TransferMatrix::interfaceMatrix_s(Layer  &  layer1, Layer  & layer2) {
     // Material parameters
     complex<double> eps1 = layer1.getMaterial().getEpsilon();
@@ -136,6 +155,13 @@ vector<vector<complex<double>>> tmm::TransferMatrix::interfaceMatrix_s(Layer  & 
     return Ms;   
 }
 
+/**
+ * @brief Interface matrix for p polarization.
+ * 
+ * @param layer1 
+ * @param layer2 
+ * @return vector<vector<complex<double>>> 
+ */
 vector<vector<complex<double>>> tmm::TransferMatrix::interfaceMatrix_p(Layer  & layer1, Layer  & layer2) {
     // Material parameters
     complex<double> eps1 = layer1.getMaterial().getEpsilon();
@@ -163,6 +189,13 @@ vector<vector<complex<double>>> tmm::TransferMatrix::interfaceMatrix_p(Layer  & 
     return Mp;   
 }
 
+/**
+ * @brief Propagation matrix.
+ * 
+ * @param layer 
+ * @param distance 
+ * @return vector<vector<complex<double>>> 
+ */
 vector<vector<complex<double>>> tmm::TransferMatrix::propagate(Layer  & layer, double distance) {
     //complex<double> kz = layer.getKz();
 
@@ -179,3 +212,4 @@ vector<vector<complex<double>>> tmm::TransferMatrix::propagate(Layer  & layer, d
     return P;
 
 }
+
