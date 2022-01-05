@@ -1,3 +1,13 @@
+/**
+ * @file tmm.h
+ * @author Charalampos Mavidis (iphpxs@gmail.com)
+ * @brief Transfer Matrix method implementation
+ * @version 1.0
+ * @date January 5, 2022
+ * 
+ * @copyright MIT license (c) 2022
+ * 
+ */
 #ifndef TMM_H
 #define TMM_H 
 

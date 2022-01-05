@@ -1,3 +1,13 @@
+/**
+ * @file tmm.cpp
+ * @author Charalampos Mavidis (iphpxs@gmail.com)
+ * @brief Transfer Matrix method implementation
+ * @version 1.0
+ * @date January 5, 2022
+ * 
+ * @copyright MIT license (c) 2022
+ * 
+ */
 #include <vector>
 #include <cmath>
 #include <complex>
@@ -86,23 +96,19 @@ void tmm::TransferMatrix::calculate() {
     Ms = interfaceMatrix_s(structure[0], structure[1]);
     Mp = interfaceMatrix_p(structure[0], structure[1]);
     
-    std::cout << "calculating interface matrices 1-2. " << endl;
-    printMatrix(Mp);
 
     for (int i=1; i < structure.size()-1; ++i) {
 
         auto propagMatrix = propagate(structure[i], structure[i].getThickness());
         auto matrixS = interfaceMatrix_s(structure[i], structure[i+1]);
         auto matrixP = interfaceMatrix_p(structure[i], structure[i+1]);
-        std::cout << "PropagMAtrix = " << endl;
-        printMatrix(propagMatrix);
+ 
         Ms = matmul(Ms,propagMatrix);
         Mp = matmul(Mp,propagMatrix);
 
         Ms = matmul(Ms, matrixS);
         Mp = matmul(Mp, matrixP);
-        //std::cout << "Ms = " << endl;
-        //printMatrix(Ms);
+
 
      
 
@@ -172,8 +178,6 @@ vector<vector<complex<double>>> tmm::TransferMatrix::interfaceMatrix_p(Layer  & 
     complex<double> k2 = sqrt(eps2*mu2)*k0;
     complex<double> k2z = sqrt(norm(k2) - kx*kx); // norm(z) = ||z||^2
 
-    cout << endl << "k2z = " << k2z << endl;
-
     complex<double> normImpedance = k2z*eps1/(k1z*eps2);
 
     complex<double> M11 = 0.5 + 0.5*normImpedance; 
@@ -205,7 +209,6 @@ vector<vector<complex<double>>> tmm::TransferMatrix::propagate(Layer  & layer, d
     complex<double> kz = sqrt(norm(k1) - kx*kx); // norm(z) = ||z||^2
     layer.setKz(kz);
 
-    cout << "k0 = " << k0 << endl;
     complex<double> imagI = complex<double>{0.0,1.0};
     vector<vector<complex<double>>> P = {{exp(-imagI*kz*distance),0},{0,exp(+imagI*kz*distance)}};
     return P;
