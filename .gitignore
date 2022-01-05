@@ -2,3 +2,4 @@ settings.json
 *.exe
 .vscode
 *.o
+m.exe
