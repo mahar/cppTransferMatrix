@@ -69,7 +69,7 @@ public:
     complex<double> getRp() { return rp; };
     complex<double> getTs() { return ts; };
     complex<double> getTp() { return tp; };
-    vector<complex<double>> getSparams() {return {rs,ts,rp,tp}; }; // get all the above
+    vector<complex<double>> getSparams() { return {rs,ts,rp,tp}; }; // get all the above
 
     // Composite matrices
     vector<vector<complex<double>>> Ms; // s polarization 2x2 matrix

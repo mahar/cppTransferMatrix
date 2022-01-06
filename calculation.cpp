@@ -9,7 +9,10 @@
  * 
  */
 #include <iostream>
-#include <vector> 
+#include <fstream>
+#include <vector>
+#include <string>
+
 #include "tmm.h" 
 
 using namespace std;
@@ -27,6 +30,9 @@ int main() {
     vector<complex<double>> ts;
     vector<double> freqList;
 
+    string filename = "diel_slabSi_normalInc.txt";
+    ofstream calcFile; 
+    calcFile.open(filename);
 
 
     Material  air =  Material();
@@ -37,12 +43,12 @@ int main() {
     vector<Layer> structure{superstrate,dielectricLayer,substrate};
 
     
-    
     for (double frequency = startFreq; frequency <= endFreq; frequency+=step){
         long double w = 2.0*pi*frequency*1e12;
         TransferMatrix * system = new  TransferMatrix(w,0.0,structure);
 
         system->calculate();
+
         freqList.push_back(frequency);
         rs.push_back(system->getRs());
         ts.push_back(system->getTs());
@@ -53,6 +59,13 @@ int main() {
 
     cout << "Calculation completed for " << freqList.size() << " frequencies.";
 
+    // Write to file
+    for (int i=0; i != freqList.size(); ++i) {
+        calcFile << freqList[i] << ", " << rs[i].real() << ", " << rs[i].imag() << ", ";
+        calcFile << ts[i].real() << ", " << ts[i].imag() << "\n";
+
+    }
+    calcFile.close();
 
     return 0; 
 }
