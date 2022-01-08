@@ -17,10 +17,6 @@
 
 using namespace std;
 
-// frequency should be in rad/sec// frequency should be in rad/sec
-double const c_const = 299792458.0; // m/s
-double const eps0 = 8.85418782e-12; 
-double const mu0 = 1.25663706e-6;
 
 /**
  * @brief Print 2D matrix.

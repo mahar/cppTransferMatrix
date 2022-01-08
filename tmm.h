@@ -19,6 +19,11 @@
 using namespace std;
 
 namespace tmm {
+// frequency should be in rad/sec// frequency should be in rad/sec
+double const c_const = 299792458.0; // m/s
+double const eps0 = 8.85418782e-12; 
+double const mu0 = 1.25663706e-6;
+double const pi = 3.1415926534;
     
 class Material { 
 public:
@@ -65,7 +70,7 @@ public:
     void calculate(); // calculate transfer matrix for the given structure
 
     // get S-parameters
-    complex<double> getRs() { return rs;};
+    complex<double> getRs() { return rs; };
     complex<double> getRp() { return rp; };
     complex<double> getTs() { return ts; };
     complex<double> getTp() { return tp; };
@@ -88,7 +93,7 @@ private:
     bool runSetup;
     vector<Layer> structure;
     // S parameters
-    complex<double> rs = 0 ; 
+    complex<double> rs = 0; 
     complex<double> rp = 0;
     complex<double> ts = 0;
     complex<double> tp = 0;   
